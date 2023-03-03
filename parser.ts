@@ -1,32 +1,33 @@
-import { z } from "./deps.ts";
-import { ColorCssStringSchema, TokenStudioColorSchema } from "./schema.ts";
+import { RadixColorsColorSchema } from "./schema.ts";
+import type { RadixColorsColor } from "./schema.ts";
+import { camelCaseToWords, extractNumbers } from "./string.ts";
 
-const ParseColorPropsSchema = z.object({
-  color: ColorCssStringSchema,
-  hueName: z.string().min(1),
-  shadeName: z.string().min(1),
-});
+type ParseColorProps = {
+  rawScaleName: string; // e.g. "amberDarkA"
+  rawColorName: string; // e.g. "amberA3"
+  rawColorValue: string; // e.g. "hsla(27, 100%, 49.9%, 0.094)"
+};
 
-const ParseColorResultSchema = z.object({
-  key: z.string().min(1),
-  tokenStudioColorSchema: TokenStudioColorSchema,
-});
+export const parseColor = ({
+  rawScaleName,
+  rawColorName,
+  rawColorValue,
+}: ParseColorProps): RadixColorsColor => {
+  const rawScaleNameWords = camelCaseToWords(rawScaleName);
+  const rawColorNameWords = camelCaseToWords(rawColorName);
+  const isDark = rawScaleNameWords.includes("dark");
+  const isAlpha = rawColorNameWords
+    .map((word) => word.replace(/-?\d*\.?\d+/g, ""))
+    .includes("a");
+  const scale = rawScaleNameWords[0];
 
-export const parseColor = (
-  props: z.infer<typeof ParseColorPropsSchema>
-): z.infer<typeof ParseColorResultSchema> => {
-  try {
-    const { color, hueName, shadeName } = ParseColorPropsSchema.parse(props);
-    return ParseColorResultSchema.parse({
-      key: `${hueName}.${shadeName}`,
-      tokenStudioColorSchema: {
-        value: color,
-        type: "color",
-        description: `Color named "${shadeName}" in "${hueName}" from Radix UI Colors.`,
-      },
-    });
-  } catch (error) {
-    console.info(props);
-    throw error;
-  }
+  const step = String(extractNumbers(rawColorName).slice(-1)[0]);
+
+  return RadixColorsColorSchema.parse({
+    scale,
+    step,
+    isDark,
+    isAlpha,
+    value: rawColorValue,
+  });
 };

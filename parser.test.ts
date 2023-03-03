@@ -1,66 +1,25 @@
 import { assertEquals } from "https://deno.land/std@0.174.0/testing/asserts.ts";
 import { parseColor } from "./parser.ts";
 
-Deno.test("ParseColor can parse a 3-digits hex color", () => {
-  const result = parseColor({
-    color: "#000",
-    hueName: "gray",
-    shadeName: "black",
-  });
-  assertEquals(result, {
-    key: "gray-black",
-    tokenStudioColorSchema: {
-      value: "#000",
-      type: "color",
-      description: 'Color named "black" in "gray" from Radix UI Colors.',
-    },
-  });
-});
+Deno.test("parseColor can parse a color", () => {
+  // Arrange
+  const rawScaleName = "amberDarkA";
+  const rawColorName = "amberA3";
+  const rawColorValue = "hsla(27, 100%, 49.9%, 0.094)";
 
-Deno.test("ParseColor can parse a 6-digits hex color", () => {
+  // Act
   const result = parseColor({
-    color: "#101010",
-    hueName: "gray",
-    shadeName: "black",
+    rawScaleName,
+    rawColorName,
+    rawColorValue,
   });
-  assertEquals(result, {
-    key: "gray-black",
-    tokenStudioColorSchema: {
-      value: "#101010",
-      type: "color",
-      description: 'Color named "black" in "gray" from Radix UI Colors.',
-    },
-  });
-});
 
-Deno.test("ParseColor can parse a hsl color", () => {
-  const result = parseColor({
-    color: "hsl(0, 0%, 0%)",
-    hueName: "gray",
-    shadeName: "black",
-  });
+  // Assert
   assertEquals(result, {
-    key: "gray-black",
-    tokenStudioColorSchema: {
-      value: "hsl(0, 0%, 0%)",
-      type: "color",
-      description: 'Color named "black" in "gray" from Radix UI Colors.',
-    },
-  });
-});
-
-Deno.test("ParseColor can parse a hsla color", () => {
-  const result = parseColor({
-    color: "hsl(39, 70.0%, 99.0%)",
-    hueName: "gray",
-    shadeName: "black",
-  });
-  assertEquals(result, {
-    key: "gray-black",
-    tokenStudioColorSchema: {
-      value: "hsl(39, 70.0%, 99.0%)",
-      type: "color",
-      description: 'Color named "black" in "gray" from Radix UI Colors.',
-    },
+    scale: "amber",
+    step: "3",
+    isDark: true,
+    isAlpha: true,
+    value: "hsla(27, 100%, 49.9%, 0.094)",
   });
 });
